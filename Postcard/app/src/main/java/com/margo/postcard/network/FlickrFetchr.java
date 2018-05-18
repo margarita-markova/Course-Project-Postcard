@@ -1,0 +1,170 @@
+package com.margo.postcard.network;
+
+import android.net.Uri;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.margo.postcard.models.GalleryItem;
+import com.margo.postcard.models.User;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.margo.postcard.Keys.REST_CONSUMER_KEY;
+
+public class FlickrFetchr  {
+    private static final String TAG = "FlickrFetchr";
+
+    private static final String FETCH_TEST_LOGIN = "flickr.test.login";
+    private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
+    private static final String SEARCH_METHOD = "flickr.photos.search";
+    public static final Uri ENDPOINT = Uri
+            .parse("https://api.flickr.com/services/rest/")
+            .buildUpon()
+            .appendQueryParameter("api_key", REST_CONSUMER_KEY)
+            .appendQueryParameter("format", "json")
+            .appendQueryParameter("nojsoncallback", "1")
+            .appendQueryParameter("extras", "url_s")
+            .build();
+
+    public User testLogin()
+    {
+       // Uri.Builder uriBuilder = ENDPOINT.buildUpon()
+          //      .appendQueryParameter("method", FETCH_TEST_LOGIN);
+        String url = buildUrl(FETCH_TEST_LOGIN, null);
+        // /uriBuilder.build().toString();
+        User user = new User();
+
+        try {
+            String jsonString = getUrlString(url);
+
+            Log.i(TAG, "Received JSON: " + jsonString);
+
+            JSONObject jsonBody = new JSONObject(jsonString);
+            JSONArray userJsonArray = jsonBody.getJSONArray("user");
+            JSONObject idJsonObject = userJsonArray.getJSONObject(0);
+
+            JSONObject usernameJsonObject = userJsonArray.getJSONObject(1);
+            user.setId(idJsonObject.getLong("id"));
+            user.setUsername(usernameJsonObject.getString("username"));
+            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
+
+            JSONObject userJsonObject = jsonBody.getJSONObject("user");
+            user.setId(userJsonObject.getLong("id"));
+            user.setUsername(userJsonObject.getString("username"));
+            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
+
+            Gson gson = new Gson();
+            user = gson.fromJson(idJsonObject.getString("id"), User.class);
+            user = gson.fromJson(idJsonObject.getString("username"), User.class);
+            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
+
+        } catch (IOException ioe) {
+            Log.e(TAG, "Failed to fetch items", ioe);
+        } catch (JSONException je) {
+            Log.e(TAG, "Failed to parse JSON", je);
+        }
+        Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
+
+        return user;
+    }
+
+    public byte[] getUrlBytes(String urlSpec) throws IOException {
+        URL url = new URL(urlSpec);
+        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            InputStream in = connection.getInputStream();
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                throw new IOException(connection.getResponseMessage() +
+                        ": with " +
+                        urlSpec);
+            }
+            int bytesRead = 0;
+            byte[] buffer = new byte[1024];
+            while ((bytesRead = in.read(buffer)) > 0) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.close();
+            return out.toByteArray();
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    public String getUrlString(String urlSpec) throws IOException {
+        return new String(getUrlBytes(urlSpec));
+    }
+
+    public List<GalleryItem> fetchRecentPhotos() {
+        String url = buildUrl(FETCH_RECENTS_METHOD, null);
+        return downloadGalleryItems(url);
+    }
+
+    public List<GalleryItem> searchPhotos(String query) {
+        String url = buildUrl(SEARCH_METHOD, query);
+        return downloadGalleryItems(url);
+    }
+
+    protected List<GalleryItem> downloadGalleryItems(String url) {
+        List<GalleryItem> items = new ArrayList<>();
+
+        try {
+            String jsonString = getUrlString(url);
+            Log.i(TAG, "Received JSON: " + jsonString);
+            JSONObject jsonBody = new JSONObject(jsonString);
+            parseItems(items, jsonBody);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Failed to fetch items", ioe);
+        } catch (JSONException je) {
+            Log.e(TAG, "Failed to parse JSON", je);
+        }
+
+        return items;
+    }
+
+    private String buildUrl(String method, String query) {
+        Uri.Builder uriBuilder = ENDPOINT.buildUpon()
+                .appendQueryParameter("method", method);
+
+        if (method.equals(SEARCH_METHOD)) {
+            uriBuilder.appendQueryParameter("text", query);
+        }
+
+        return uriBuilder.build().toString();
+    }
+
+    private void parseItems(List<GalleryItem> items, JSONObject jsonBody)
+            throws IOException, JSONException {
+
+        JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
+        JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
+
+        for (int i = 0; i < photoJsonArray.length(); i++) {
+            JSONObject photoJsonObject = photoJsonArray.getJSONObject(i);
+
+            GalleryItem item = new GalleryItem();
+            item.setId(photoJsonObject.getString("id"));
+            item.setCaption(photoJsonObject.getString("title"));
+
+            if (!photoJsonObject.has("url_s")) {
+                continue;
+            }
+
+            item.setUrl(photoJsonObject.getString("url_s"));
+            item.setOwner(photoJsonObject.getString("owner"));
+            items.add(item);
+        }
+    }
+
+
+}

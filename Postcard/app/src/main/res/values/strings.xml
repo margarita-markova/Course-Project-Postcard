@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Postcard</string>
+    <string name="intent_scheme">oauth</string>
+    <string name="intent_host">postcardmarks</string>
+    <string name="title_activity_photos"> </string>
+    <string name="logout_hint">Log Out</string>
+</resources>

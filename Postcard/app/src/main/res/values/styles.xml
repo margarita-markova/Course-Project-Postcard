@@ -1,0 +1,25 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Design.CoordinatorLayout</item>
+
+    </style>
+
+    <style name="Login" parent="@android:style/Theme.NoTitleBar" />
+
+    <style name="ToolbarTheme" parent="AppTheme">
+            <item name="android:layout_width">match_parent</item>
+            <item name="android:layout_height">?attr/actionBarSize</item>
+    </style>
+
+    <style name="ToolBarWithNavigationBack">
+        <item name="navigationIcon">@drawable/logout</item>
+    </style>
+
+
+
+</resources>

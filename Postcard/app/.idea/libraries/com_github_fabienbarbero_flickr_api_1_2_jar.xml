@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="com.github.fabienbarbero:flickr-api:1.2@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.fabienbarbero/flickr-api/1.2/2047b4960595041977d2525f6fa81fca4bce6c58/flickr-api-1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.fabienbarbero/flickr-api/1.2/72632b62542d5322e8b9732758bfefa27606116a/flickr-api-1.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
