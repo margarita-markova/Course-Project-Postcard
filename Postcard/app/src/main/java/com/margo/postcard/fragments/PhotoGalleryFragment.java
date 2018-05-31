@@ -1,5 +1,6 @@
 package com.margo.postcard.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,9 +10,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.margo.postcard.GridSpacingItemDecoration;
+import com.margo.postcard.QueryPreferences;
 import com.margo.postcard.R;
 import com.margo.postcard.activities.PhotoPageActivity;
 import com.margo.postcard.activities.UserAccountActivity;
@@ -31,12 +34,18 @@ import com.margo.postcard.network.ThumbnailDownloader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoGalleryFragment extends Fragment {
-    private static final String TAG = "PhotoGalleryFragment";
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class PhotoGalleryFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+    private final String TAG = "PhotoGalleryFragment";
 
     private RecyclerView mPhotoRecyclerView;
     private List<GalleryItem> mItems = new ArrayList<>();
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
+    private Handler responseHandler;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private OnFragmentInteractionListener mListener;
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -46,11 +55,10 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-       // setHasOptionsMenu(true);
 
         updateItems();
 
-        Handler responseHandler = new Handler();
+        responseHandler = new Handler();
         mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
         mThumbnailDownloader.setThumbnailDownloadListener(
                 new ThumbnailDownloader.ThumbnailDownloadListener<PhotoHolder>() {
@@ -69,15 +77,23 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
-        mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.photo_recycler_view);
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
 
-       // mPhotoRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+
+        View rootView = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+        mPhotoRecyclerView = (RecyclerView) rootView.findViewById(R.id.photo_recycler_view);
+
+        int spanCount = 2;
+        int spacing = 50;
+        boolean includeEdge = true;
+        mPhotoRecyclerView.addItemDecoration(new GridSpacingItemDecoration(spanCount, spacing, includeEdge));
+        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), spanCount));
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
 
         setupAdapter();
 
-        return v;
+        return rootView;
     }
 
     @Override
@@ -93,78 +109,25 @@ public class PhotoGalleryFragment extends Fragment {
         Log.i(TAG, "Background thread destroyed");
     }
 
-/*    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-        menuInflater.inflate(R.menu.fragment_photo_gallery, menu);
-
-        MenuItem searchItem = menu.findItem(R.id.menu_item_search);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                Log.d(TAG, "QueryTextSubmit: " + s);
-                QueryPreferences.setStoredQuery(getActivity(), s);
-                updateItems();
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                Log.d(TAG, "QueryTextChange: " + s);
-                return false;
-            }
-        });
-
-        searchView.setOnSearchClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String query = QueryPreferences.getStoredQuery(getActivity());
-                searchView.setQuery(query, false);
-            }
-        });
-
-        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
-        if (PollService.isServiceAlarmOn(getActivity())) {
-            toggleItem.setTitle(R.string.stop_polling);
-        } else {
-            toggleItem.setTitle(R.string.start_polling);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_item_clear:
-                QueryPreferences.setStoredQuery(getActivity(), null);
-                updateItems();
-                return true;
-            case R.id.menu_item_toggle_polling:
-                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
-                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
-                getActivity().invalidateOptionsMenu();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-    */
-
-    private void updateItems() {
-        String query = null;//QueryPreferences.getStoredQuery(getActivity());
+    public void updateItems() {
+        String query = QueryPreferences.getStoredQuery(getActivity());
         new FetchItemsTask(query).execute();
     }
 
-    private void setupAdapter() {
+    public void setupAdapter() {
         if (isAdded()) {
             mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
         }
     }
 
+    @Override
+    public void onRefresh() {
+        mThumbnailDownloader.clearQueue();
+        updateItems();
+    }
+
     private class PhotoHolder extends RecyclerView.ViewHolder
-           implements View.OnClickListener
-    {
+            implements View.OnClickListener {
         private ImageView mItemImageView;
         private GalleryItem mGalleryItem;
 
@@ -220,7 +183,7 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    private class FetchItemsTask extends AsyncTask<Void,Void,List<GalleryItem>> {
+    private class FetchItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
         private String mQuery;
 
         public FetchItemsTask(String query) {
@@ -241,8 +204,32 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> items) {
             mItems = items;
             setupAdapter();
+            mSwipeRefreshLayout.setRefreshing(false);
         }
 
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+
+    public interface OnFragmentInteractionListener {
+
+        void messageFromChildFragment(Uri uri);
     }
 
 }

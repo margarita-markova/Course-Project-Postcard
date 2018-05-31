@@ -14,7 +14,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
 
     @LayoutRes
     protected int getLayoutResId() {
-        return R.layout.activity_user_account;
+        return R.layout.web_activity;
     }
 
     @Override
@@ -23,12 +23,12 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
         setContentView(getLayoutResId());
 
         FragmentManager fm = getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentById(R.id.materialup_viewpager);
+        Fragment fragment = fm.findFragmentById(R.id.web_container);
 
         if (fragment == null) {
             fragment = createFragment();
             fm.beginTransaction()
-                    .add(R.id.materialup_viewpager, fragment)
+                    .add(R.id.web_container, fragment)
                     .commit();
         }
     }

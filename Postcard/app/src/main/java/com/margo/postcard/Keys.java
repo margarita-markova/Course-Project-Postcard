@@ -19,15 +19,11 @@ import android.util.Log;
 
 public class Keys {
    public static final BaseApi REST_API_INSTANCE = FlickrApi.instance();
-  //  public static final Class<? extends DefaultApi10a> REST_API_INSTANCE = FlickrApi.class;
-
-    public static final String REST_URL = "https://www.flickr.com/services";
-
+    public static final String REST_URL = "https://www.flickr.com/services/api/";
     public static final String REST_CONSUMER_KEY = "949f43acae31017cee4ebda25c42798a";
-
     public static final String REST_CONSUMER_SECRET = "9dcee93e1311be6d";
-
-    public static final String REST_CALLBACK_URL = "oauth://cprest";
-
+    public static final String REST_CALLBACK_URL = "appforflickr://callback";
     public static final String ERR_CODE_FLICKR_UNAVAILABLE = "105";
+
+
 }

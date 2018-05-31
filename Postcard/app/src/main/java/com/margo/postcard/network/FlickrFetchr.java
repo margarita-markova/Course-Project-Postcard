@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.margo.postcard.models.GalleryItem;
-import com.margo.postcard.models.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,48 +34,6 @@ public class FlickrFetchr  {
             .appendQueryParameter("nojsoncallback", "1")
             .appendQueryParameter("extras", "url_s")
             .build();
-
-    public User testLogin()
-    {
-       // Uri.Builder uriBuilder = ENDPOINT.buildUpon()
-          //      .appendQueryParameter("method", FETCH_TEST_LOGIN);
-        String url = buildUrl(FETCH_TEST_LOGIN, null);
-        // /uriBuilder.build().toString();
-        User user = new User();
-
-        try {
-            String jsonString = getUrlString(url);
-
-            Log.i(TAG, "Received JSON: " + jsonString);
-
-            JSONObject jsonBody = new JSONObject(jsonString);
-            JSONArray userJsonArray = jsonBody.getJSONArray("user");
-            JSONObject idJsonObject = userJsonArray.getJSONObject(0);
-
-            JSONObject usernameJsonObject = userJsonArray.getJSONObject(1);
-            user.setId(idJsonObject.getLong("id"));
-            user.setUsername(usernameJsonObject.getString("username"));
-            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
-
-            JSONObject userJsonObject = jsonBody.getJSONObject("user");
-            user.setId(userJsonObject.getLong("id"));
-            user.setUsername(userJsonObject.getString("username"));
-            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
-
-            Gson gson = new Gson();
-            user = gson.fromJson(idJsonObject.getString("id"), User.class);
-            user = gson.fromJson(idJsonObject.getString("username"), User.class);
-            Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
-
-        } catch (IOException ioe) {
-            Log.e(TAG, "Failed to fetch items", ioe);
-        } catch (JSONException je) {
-            Log.e(TAG, "Failed to parse JSON", je);
-        }
-        Log.i(TAG, "user id " + user.getId() + " username " + user.getUsername());
-
-        return user;
-    }
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);

@@ -17,7 +17,7 @@
     </style>
 
     <style name="ToolBarWithNavigationBack">
-        <item name="navigationIcon">@drawable/logout</item>
+        <item name="navigationIcon">@drawable/ic_exit_to_app_black_24dp</item>
     </style>
 
 

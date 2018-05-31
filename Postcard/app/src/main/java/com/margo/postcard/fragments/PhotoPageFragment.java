@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +60,14 @@ public class PhotoPageFragment extends Fragment {
 
             public void onReceivedTitle(WebView webView, String title) {
                 AppCompatActivity activity = (AppCompatActivity) getActivity();
-                activity.getSupportActionBar().setSubtitle(title);
+                try {
+                    activity.getSupportActionBar().setSubtitle(title);
+                }
+                catch (NullPointerException e)
+                {
+                    e.printStackTrace();
+                    Log.i("PhotoPageFragment", "SetSubtitle NullPointer");
+                }
             }
         });
         mWebView.setWebViewClient(new WebViewClient());

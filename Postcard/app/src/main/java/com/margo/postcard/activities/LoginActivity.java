@@ -1,8 +1,12 @@
 package com.margo.postcard.activities;
 
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,9 +24,7 @@ import static com.margo.postcard.Keys.REST_CONSUMER_KEY;
 import static com.margo.postcard.Keys.REST_CONSUMER_SECRET;
 
 
-
 public class LoginActivity extends OAuthLoginActivity<FlickrClient> implements View.OnClickListener {
-    // Button login;
     private static final String TAG = "log";
 
     @BindView(R.id.textView2)
@@ -36,7 +38,6 @@ public class LoginActivity extends OAuthLoginActivity<FlickrClient> implements V
         setTheme(R.style.Login);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
     }
 
     @Override
@@ -52,15 +53,14 @@ public class LoginActivity extends OAuthLoginActivity<FlickrClient> implements V
 
     @Override
     public void onClick(View v) {
-            if (!getClient().isAuthenticated()) {
-                getClient().connect();
-            }
-            //требуется дважды нажимать на кнопку? Сделай стартовой активностью другую, которая вызовет
-            //startForResultActivity(LoginActivity), для этого измени манифест
-            else
-                {
-                   onLoginSuccess();
-                }
+        if (!getClient().isAuthenticated()) {
+            getClient().connect();
         }
+        //требуется дважды нажимать на кнопку? Сделай стартовой активностью другую, которая вызовет
+        //startForResultActivity(LoginActivity), для этого измени манифест
+        else {
+            onLoginSuccess();
+        }
+    }
 
 }
