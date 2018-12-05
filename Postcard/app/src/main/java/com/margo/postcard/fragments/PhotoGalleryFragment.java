@@ -78,7 +78,6 @@ public class PhotoGalleryFragment extends Fragment implements SwipeRefreshLayout
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         View rootView = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) rootView.findViewById(R.id.photo_recycler_view);
 

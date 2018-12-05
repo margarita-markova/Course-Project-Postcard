@@ -23,7 +23,6 @@ import butterknife.BindView;
 import static com.margo.postcard.Keys.REST_CONSUMER_KEY;
 import static com.margo.postcard.Keys.REST_CONSUMER_SECRET;
 
-
 public class LoginActivity extends OAuthLoginActivity<FlickrClient> implements View.OnClickListener {
     private static final String TAG = "log";
 

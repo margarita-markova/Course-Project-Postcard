@@ -3,7 +3,6 @@ package com.margo.postcard.network;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.gson.Gson;
 import com.margo.postcard.models.GalleryItem;
 
 import org.json.JSONArray;

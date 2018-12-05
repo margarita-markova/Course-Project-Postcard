@@ -24,7 +24,5 @@ public class FlickrClient extends OAuthBaseClient {
         String apiUrl = getApiUrl("?format=json&nojsoncallback=1&method=flickr.test.login");
         Log.d("DEBUG", "Sending API call to " + apiUrl);
         client.get(apiUrl, null, handler);
-       // //client.
-      //  Log.i("hmm", "jjjj");
     }
 }

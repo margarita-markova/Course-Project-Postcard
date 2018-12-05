@@ -30,9 +30,6 @@ import butterknife.ButterKnife;
 public class UserAccountActivity extends AppCompatActivity implements
         PhotoGalleryFragment.OnFragmentInteractionListener {
 
-        /*@BindView(R.id.materialup_tabs)
-        TabLayout tabLayout;*/
-
     @BindView(R.id.materialup_viewpager)
     ViewPager viewPager;
 
